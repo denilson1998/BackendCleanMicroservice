@@ -1,0 +1,57 @@
+version: '3.4'
+
+networks:
+  backendnetwork:
+
+services:
+  # AUTHENTICATION MICROSERVICE  
+  authentication_api_db:
+    container_name: authentication_api_db
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    ports:
+     - 8002:1433
+    environment:
+     - ACCEPT_EULA=Y
+     - MSSQL_SA_PASSWORD=denilson123*
+    networks:
+     - backendnetwork
+  authentication_api:
+    container_name: authentication_api
+    ports:
+     - 8001:8080
+    image: ${DOCKER_REGISTRY-}authenticationapi
+    build:
+      context: .
+      dockerfile: Authentication.Api/Dockerfile
+    depends_on:
+     - authentication_api_db
+    networks:
+     - backendnetwork
+    #command: ["sh", "-c", "dotnet ef database update && dotnet run"]
+    #command: ["dotnet", "ef", "database update"]
+    #command: ["dotnet", "-c", "dotnet ef database update && dotnet Authentication.Api.dll"]
+
+  # COUPONS MICROSERVICE
+  coupons_api_db:
+    container_name: coupons_api_db
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    ports:
+     - 8004:1433
+    environment:
+     - ACCEPT_EULA=Y
+     - MSSQL_SA_PASSWORD=denilson123*
+    networks:
+     - backendnetwork
+  coupons_api:
+    container_name: coupons_api
+    ports:
+     - 8003:8081
+    image: ${DOCKER_REGISTRY-}couponsapi
+    build:
+      context: .
+      dockerfile: Coupons.Api/Dockerfile
+    depends_on:
+     - coupons_api_db
+    networks:
+     - backendnetwork
+
